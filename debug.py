@@ -26,4 +26,4 @@ env = gym.make(
 
 env.debug()
 state_value = np.random.rand(width, height)
-env.plot_state_value_function(state_value, cmap='bwr')
+env.plot_state_value_function(state_value, cmap='bwr', fname='state_value')

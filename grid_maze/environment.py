@@ -105,7 +105,7 @@ class GridMaze(gym.Env):
         self.ax.add_patch(self.agent_circle)
         self.fig.savefig(self.render_dir+f'{self.step_counter:04}.png')
 
-    def plot_state_value_function(self, state_value, cmap):
+    def plot_state_value_function(self, state_value, cmap, fname):
         fig, ax = plt.subplots(1, 1, tight_layout=True)
         ax.set_xlabel(r'$x$')
         ax.set_ylabel(r'$y$')
@@ -113,7 +113,7 @@ class GridMaze(gym.Env):
         ax.set_ylim(self.ymin-0.5, self.ymax+0.5)
         ax.set_aspect('equal')
         ax.imshow(state_value.T, cmap=cmap, origin='lower')
-        fig.savefig('state_value.png')
+        fig.savefig(f'{fname}.png')
 
     def debug(self):
         # print('reset')
