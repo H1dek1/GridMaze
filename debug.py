@@ -11,15 +11,15 @@ env = gym.make(
         goal_position=np.array([3, 2]),
         obstacle_positions=[
             [1, 1],
-            [2, 1],
             [3, 1],
             [1, 3],
             [1, 3],
             [2, 4],
             ],
         reward_map={
-            (2, 2): 1,
-            }
+            (2, 2): 10,
+            },
+        render_dir='./render/'
         )
 
 env.debug()

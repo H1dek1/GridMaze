@@ -6,7 +6,7 @@ import matplotlib.patches as patches
 
 
 class GridMaze(gym.Env):
-    def __init__(self, width=3, height=3, start_position=np.array([0, 0]), goal_position=np.array([2, 2]), obstacle_positions=[], reward_map={}):
+    def __init__(self, width=3, height=3, start_position=np.array([0, 0]), goal_position=np.array([2, 2]), obstacle_positions=[], reward_map={}, render_dir=None):
         """
         set grid world
         """
@@ -40,6 +40,7 @@ class GridMaze(gym.Env):
 
         self.start_pos = start_position
         self.goal_pos = goal_position
+        self.render_dir = render_dir
 
     def reset(self):
         self.pos = self.start_pos.copy()
@@ -71,14 +72,25 @@ class GridMaze(gym.Env):
                     [self.pos[1], tmp_pos[1]],
                     c='r'
                     )
+            """
+            Valid area
+            """
+            # move
             self.pos = tmp_pos.copy()
+            # get reward
             reward = self.reward_map[self.pos[0], self.pos[1]]
             if self.map[self.pos[0], self.pos[1]] == 2:
+                """
+                when goal
+                """
                 done = True
             else:
                 done = False
 
         else:
+            """
+            Invalid area
+            """
             reward = -1
             done = False
 
@@ -91,7 +103,7 @@ class GridMaze(gym.Env):
             self.agent_circle.remove()
         self.agent_circle = patches.Circle(xy=self.pos, radius=0.1, fc='r')
         self.ax.add_patch(self.agent_circle)
-        self.fig.savefig(f'render/{self.step_counter:04}.png')
+        self.fig.savefig(self.render_dir+f'{self.step_counter:04}.png')
 
     def debug(self):
         # print('reset')
