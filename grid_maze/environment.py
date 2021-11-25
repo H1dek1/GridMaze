@@ -98,12 +98,22 @@ class GridMaze(gym.Env):
         self.step_counter += 1
         return self.pos, reward, done, info
 
-    def render(self, mode='rgb_array'):
+    def render(self, mode='png'):
         if self.agent_circle is not None:
             self.agent_circle.remove()
         self.agent_circle = patches.Circle(xy=self.pos, radius=0.1, fc='r')
         self.ax.add_patch(self.agent_circle)
         self.fig.savefig(self.render_dir+f'{self.step_counter:04}.png')
+
+    def plot_state_value_function(self, state_value, cmap):
+        fig, ax = plt.subplots(1, 1, tight_layout=True)
+        ax.set_xlabel(r'$x$')
+        ax.set_ylabel(r'$y$')
+        ax.set_xlim(self.xmin-0.5, self.xmax+0.5)
+        ax.set_ylim(self.ymin-0.5, self.ymax+0.5)
+        ax.set_aspect('equal')
+        ax.imshow(state_value.T, cmap=cmap, origin='lower')
+        fig.savefig('state_value.png')
 
     def debug(self):
         # print('reset')
