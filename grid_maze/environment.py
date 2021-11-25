@@ -14,6 +14,9 @@ class GridMaze(gym.Env):
         self.xmax = width - 1
         self.ymin = 0
         self.ymax = height - 1
+
+        self.xgrid = np.arange(0.5, self.xmax, 1.0)
+        self.ygrid = np.arange(0.5, self.ymax, 1.0)
         
         self.map = np.zeros((width, height))
         self.map[start_position[0], start_position[1]] = 1
@@ -50,6 +53,8 @@ class GridMaze(gym.Env):
         self.ax.set_ylabel(r'$y$')
         self.ax.set_xlim(self.xmin-0.5, self.xmax+0.5)
         self.ax.set_ylim(self.ymin-0.5, self.ymax+0.5)
+        self.ax.vlines(self.xgrid, self.ymin-0.5, self.ymax+0.5, color='k')
+        self.ax.hlines(self.ygrid, self.xmin-0.5, self.xmax+0.5, color='k')
         self.ax.set_aspect('equal')
         self.ax.imshow(self.map.T, cmap='gray', vmin=-1, vmax=0, origin='lower')
 
