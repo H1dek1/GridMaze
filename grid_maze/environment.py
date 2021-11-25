@@ -1,3 +1,4 @@
+import sys
 import gym
 import numpy as np
 import matplotlib.pyplot as plt
@@ -43,8 +44,13 @@ class GridMaze(gym.Env):
     def reset(self):
         self.pos = self.start_pos.copy()
         self.step_counter = 0
-        self.fig, self.ax = plt.subplots(1, 1)
-        self.ax.imshow(self.map, cmap='gray', vmin=-1, vmax=0, origin='lower')
+        self.fig, self.ax = plt.subplots(1, 1, tight_layout=True)
+        self.ax.set_xlabel(r'$x$')
+        self.ax.set_ylabel(r'$y$')
+        self.ax.set_xlim(self.xmin-0.5, self.xmax+0.5)
+        self.ax.set_ylim(self.ymin-0.5, self.ymax+0.5)
+        self.ax.set_aspect('equal')
+        self.ax.imshow(self.map.T, cmap='gray', vmin=-1, vmax=0, origin='lower')
 
         start_circle = patches.Circle(xy=self.start_pos, radius=0.4, ec='k', fill=False)
         goal_circle = patches.Circle(xy=self.goal_pos, radius=0.4, ec='k', fill=False)
@@ -88,24 +94,23 @@ class GridMaze(gym.Env):
         self.fig.savefig(f'render/{self.step_counter:04}.png')
 
     def debug(self):
-        print('x range:', self.xmin, self.xmax)
-        print('y range:', self.ymin, self.ymax)
-        print('map')
-        print(self.map)
-        print('reward map')
-        print(self.reward_map)
-        print('action list')
-        print(self.action_list)
-
-        print('reset')
-        obs = self.reset()
-        print('obs:', obs)
-
+        # print('reset')
+        # obs = self.reset()
+        # print('obs:', obs)
+        # self.render()
+        # self.step(0)
+        # self.render()
+        # print('pos:', self.pos)
+        # self.step(0)
+        # self.render()
+        # print('pos:', self.pos)
+        self.reset()
+        self.render()
         done = False
+
         while not done:
             action = self.action_space.sample()
             obs, reward, done, _ = self.step(action)
             self.render()
-            print('action:', action, ', pos:', obs)
 
         print('total steps:', self.step_counter)
