@@ -24,6 +24,8 @@ class GridMaze(gym.Env):
         for pos, reward in reward_map.items():
             self.reward_map[pos[0], pos[1]] = reward
 
+        # self.observation_pace = gym.spaces.Discrete(height*width)
+
         """
         set action space
         """
@@ -32,6 +34,8 @@ class GridMaze(gym.Env):
         self.action_list[1] = np.array([ 0, 1])
         self.action_list[2] = np.array([-1, 0])
         self.action_list[3] = np.array([ 0,-1])
+
+        self.action_space = gym.spaces.Discrete(len(self.action_list))
 
         self.start_pos = start_position
         self.goal_pos = goal_position
@@ -48,6 +52,7 @@ class GridMaze(gym.Env):
         self.ax.text(self.goal_pos[0], self.goal_pos[1], s='goal', ha='center', va='center')
         self.ax.add_patch(start_circle)
         self.ax.add_patch(goal_circle)
+        self.agent_circle = None
         return self.pos
 
     def step(self, action_id):
@@ -55,6 +60,11 @@ class GridMaze(gym.Env):
         if self.xmin <= tmp_pos[0] <= self.xmax \
                 and self.ymin <= tmp_pos[1] <= self.ymax \
                 and self.map[tmp_pos[0], tmp_pos[1]] != -1:
+            self.ax.plot(
+                    [self.pos[0], tmp_pos[0]],
+                    [self.pos[1], tmp_pos[1]],
+                    c='r'
+                    )
             self.pos = tmp_pos.copy()
             reward = self.reward_map[self.pos[0], self.pos[1]]
             if self.map[self.pos[0], self.pos[1]] == 2:
@@ -70,9 +80,11 @@ class GridMaze(gym.Env):
         self.step_counter += 1
         return self.pos, reward, done, info
 
-    def render(self):
-        agent_circle = patches.Circle(xy=self.pos, radius=0.1, fc='r')
-        self.ax.add_patch(agent_circle)
+    def render(self, mode='rgb_array'):
+        if self.agent_circle is not None:
+            self.agent_circle.remove()
+        self.agent_circle = patches.Circle(xy=self.pos, radius=0.1, fc='r')
+        self.ax.add_patch(self.agent_circle)
         self.fig.savefig(f'render/{self.step_counter:04}.png')
 
     def debug(self):
@@ -89,17 +101,11 @@ class GridMaze(gym.Env):
         obs = self.reset()
         print('obs:', obs)
 
-        print('step')
-        action = 0
-        print('action:', action)
-        obs, reward, done, _ = self.step(action)
-        print('obs:', obs)
-        print('reward:', reward)
+        done = False
+        while not done:
+            action = self.action_space.sample()
+            obs, reward, done, _ = self.step(action)
+            self.render()
+            print('action:', action, ', pos:', obs)
 
-        print('step')
-        action = 1
-        print('action:', action)
-        obs, reward, done, _ = self.step(action)
-        print('obs:', obs)
-        print('reward:', reward)
-        self.render()
+        print('total steps:', self.step_counter)

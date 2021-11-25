@@ -1,2 +1,4 @@
 .venv3.8/
 .python-version
+render/
+grid_maze/__pycache__/
