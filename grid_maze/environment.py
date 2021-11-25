@@ -2,6 +2,8 @@ import sys
 import gym
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.cm as cm
+import matplotlib.colors as colors
 import matplotlib.patches as patches
 
 
@@ -28,7 +30,7 @@ class GridMaze(gym.Env):
         for pos, reward in reward_map.items():
             self.reward_map[pos[0], pos[1]] = reward
 
-        # self.observation_pace = gym.spaces.Discrete(height*width)
+        self.observation_pace = gym.spaces.Discrete(height*width)
 
         """
         set action space
@@ -45,25 +47,34 @@ class GridMaze(gym.Env):
         self.goal_pos = goal_position
         self.render_dir = render_dir
 
+    def draw_maze(self, ax):
+        ax.set_xlabel(r'$x$')
+        ax.set_ylabel(r'$y$')
+        ax.set_xlim(self.xmin-0.5, self.xmax+0.5)
+        ax.set_ylim(self.ymin-0.5, self.ymax+0.5)
+        ax.vlines(self.xgrid, self.ymin-0.5, self.ymax+0.5, color='k')
+        ax.hlines(self.ygrid, self.xmin-0.5, self.xmax+0.5, color='k')
+        ax.set_aspect('equal')
+        # customize cmap
+        cmap = cm.gray
+        cmap_data = cmap(np.arange(cmap.N))
+        cmap_data[-1, 3] = 0
+        customized_gray = colors.ListedColormap(cmap_data)
+
+        ax.imshow(self.map.T, cmap=customized_gray, vmin=-1, vmax=0, origin='lower')
+        start_circle = patches.Circle(xy=self.start_pos, radius=0.4, ec='k', fill=False)
+        goal_circle = patches.Circle(xy=self.goal_pos, radius=0.4, ec='k', fill=False)
+        ax.text(self.start_pos[0], self.start_pos[1], s='start', ha='center', va='center')
+        ax.text(self.goal_pos[0], self.goal_pos[1], s='goal', ha='center', va='center')
+        ax.add_patch(start_circle)
+        ax.add_patch(goal_circle)
+
+
     def reset(self):
         self.pos = self.start_pos.copy()
         self.step_counter = 0
         self.fig, self.ax = plt.subplots(1, 1, tight_layout=True)
-        self.ax.set_xlabel(r'$x$')
-        self.ax.set_ylabel(r'$y$')
-        self.ax.set_xlim(self.xmin-0.5, self.xmax+0.5)
-        self.ax.set_ylim(self.ymin-0.5, self.ymax+0.5)
-        self.ax.vlines(self.xgrid, self.ymin-0.5, self.ymax+0.5, color='k')
-        self.ax.hlines(self.ygrid, self.xmin-0.5, self.xmax+0.5, color='k')
-        self.ax.set_aspect('equal')
-        self.ax.imshow(self.map.T, cmap='gray', vmin=-1, vmax=0, origin='lower')
-
-        start_circle = patches.Circle(xy=self.start_pos, radius=0.4, ec='k', fill=False)
-        goal_circle = patches.Circle(xy=self.goal_pos, radius=0.4, ec='k', fill=False)
-        self.ax.text(self.start_pos[0], self.start_pos[1], s='start', ha='center', va='center')
-        self.ax.text(self.goal_pos[0], self.goal_pos[1], s='goal', ha='center', va='center')
-        self.ax.add_patch(start_circle)
-        self.ax.add_patch(goal_circle)
+        self.draw_maze(self.ax)
         self.agent_circle = None
         return self.pos
 
@@ -112,25 +123,11 @@ class GridMaze(gym.Env):
 
     def plot_state_value_function(self, state_value, cmap, fname):
         fig, ax = plt.subplots(1, 1, tight_layout=True)
-        ax.set_xlabel(r'$x$')
-        ax.set_ylabel(r'$y$')
-        ax.set_xlim(self.xmin-0.5, self.xmax+0.5)
-        ax.set_ylim(self.ymin-0.5, self.ymax+0.5)
-        ax.set_aspect('equal')
         ax.imshow(state_value.T, cmap=cmap, origin='lower')
+        self.draw_maze(ax)
         fig.savefig(f'{fname}.png')
 
     def debug(self):
-        # print('reset')
-        # obs = self.reset()
-        # print('obs:', obs)
-        # self.render()
-        # self.step(0)
-        # self.render()
-        # print('pos:', self.pos)
-        # self.step(0)
-        # self.render()
-        # print('pos:', self.pos)
         self.reset()
         self.render()
         done = False
