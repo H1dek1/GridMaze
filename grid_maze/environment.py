@@ -140,6 +140,9 @@ class GridMaze(gym.Env):
         self.draw_maze(ax)
         fig.savefig(f'{fname}.png')
 
+    def get_zero_map(self):
+        return np.zeros((self.width, self.height))
+
     def debug(self):
         self.reset()
         self.render()
