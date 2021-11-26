@@ -8,7 +8,7 @@ import matplotlib.patches as patches
 
 
 class GridMaze(gym.Env):
-    def __init__(self, width=3, height=3, start_position=np.array([0, 0]), goal_position=np.array([2, 2]), obstacle_positions=[], reward_map={}, render_dir=None, flatten_state=False):
+    def __init__(self, width=3, height=3, start_position=np.array([0, 0]), goal_position=np.array([2, 2]), obstacle_positions=[], reward_map={}, render_dir=None, flatten_state=False, collision_penalty=0.0):
         """
         set grid world
         """
@@ -49,6 +49,7 @@ class GridMaze(gym.Env):
         self.start_pos = start_position
         self.goal_pos = goal_position
         self.render_dir = render_dir
+        self.collision_penalty = collision_penalty
 
     def draw_maze(self, ax):
         ax.set_xlabel(r'$x$')
@@ -116,7 +117,7 @@ class GridMaze(gym.Env):
             """
             Invalid area
             """
-            reward = -1
+            reward = -self.collision_penalty
             done = False
 
         self.step_counter += 1
