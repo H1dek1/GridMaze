@@ -8,29 +8,32 @@ import matplotlib.patches as patches
 
 
 class GridMaze(gym.Env):
-    def __init__(self, width=3, height=3, start_position=np.array([0, 0]), goal_position=np.array([2, 2]), obstacle_positions=[], reward_map={}, render_dir=None):
+    def __init__(self, width=3, height=3, start_position=np.array([0, 0]), goal_position=np.array([2, 2]), obstacle_positions=[], reward_map={}, render_dir=None, flatten_state=False):
         """
         set grid world
         """
+        self.flatten_state = flatten_state
+        self.width = width
+        self.height = height
         self.xmin = 0
-        self.xmax = width - 1
+        self.xmax = self.width - 1
         self.ymin = 0
-        self.ymax = height - 1
+        self.ymax = self.height - 1
 
         self.xgrid = np.arange(0.5, self.xmax, 1.0)
         self.ygrid = np.arange(0.5, self.ymax, 1.0)
         
-        self.map = np.zeros((width, height))
+        self.map = np.zeros((self.width, self.height))
         self.map[start_position[0], start_position[1]] = 1
         self.map[goal_position[0], goal_position[1]] = 2
         for pos in obstacle_positions:
             self.map[pos[0], pos[1]] = -1
 
-        self.reward_map = np.zeros((width, height))
+        self.reward_map = np.zeros((self.width, self.height))
         for pos, reward in reward_map.items():
             self.reward_map[pos[0], pos[1]] = reward
 
-        self.observation_pace = gym.spaces.Discrete(height*width)
+        self.observation_pace = gym.spaces.Discrete(self.height*self.width)
 
         """
         set action space
@@ -76,7 +79,13 @@ class GridMaze(gym.Env):
         self.fig, self.ax = plt.subplots(1, 1, tight_layout=True)
         self.draw_maze(self.ax)
         self.agent_circle = None
-        return self.pos
+        
+        if self.flatten_state:
+            obs = self.pos[0] + self.width*self.pos[1]
+        else:
+            obs = self.pos
+
+        return obs
 
     def step(self, action_id):
         tmp_pos = self.pos + self.action_list[action_id]
@@ -110,9 +119,13 @@ class GridMaze(gym.Env):
             reward = -1
             done = False
 
-        info = {}
         self.step_counter += 1
-        return self.pos, reward, done, info
+        info = {}
+        if self.flatten_state:
+            obs = self.pos[0] + self.width*self.pos[1]
+        else:
+            obs = self.pos
+        return obs, reward, done, info
 
     def render(self, mode='png'):
         if self.agent_circle is not None:
@@ -135,6 +148,7 @@ class GridMaze(gym.Env):
         while not done:
             action = self.action_space.sample()
             obs, reward, done, _ = self.step(action)
+            print('obs:', obs)
             self.render()
 
         print('total steps:', self.step_counter)

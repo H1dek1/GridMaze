@@ -7,6 +7,7 @@ width = 4
 height = 5
 env = gym.make(
         'GridMaze-v0',
+        flatten_state=True,
         width=width,
         height=height,
         start_position=np.array([0, 1]),
