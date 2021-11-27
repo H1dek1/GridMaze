@@ -26,8 +26,10 @@ class GridMaze(gym.Env):
         self.map = np.zeros((self.width, self.height))
         self.map[start_position[0], start_position[1]] = 1
         self.map[goal_position[0], goal_position[1]] = 2
+        self.empty_map = np.zeros((self.width, self.height))
         for pos in obstacle_positions:
             self.map[pos[0], pos[1]] = -1
+            self.empty_map[pos[0], pos[1]] = np.nan
 
         self.reward_map = np.zeros((self.width, self.height))
         for pos, reward in reward_map.items():
@@ -39,10 +41,10 @@ class GridMaze(gym.Env):
         set action space
         """
         self.action_list = {}
-        self.action_list[0] = np.array([ 1, 0])
-        self.action_list[1] = np.array([ 0, 1])
-        self.action_list[2] = np.array([-1, 0])
-        self.action_list[3] = np.array([ 0,-1])
+        self.action_list[0] = np.array([ 1,  0])
+        self.action_list[1] = np.array([ 0,  1])
+        self.action_list[2] = np.array([-1,  0])
+        self.action_list[3] = np.array([ 0, -1])
 
         self.action_space = gym.spaces.Discrete(len(self.action_list))
 
@@ -73,7 +75,6 @@ class GridMaze(gym.Env):
         ax.add_patch(start_circle)
         ax.add_patch(goal_circle)
 
-
     def reset(self):
         self.pos = self.start_pos.copy()
         self.step_counter = 0
@@ -90,9 +91,10 @@ class GridMaze(gym.Env):
 
     def step(self, action_id):
         tmp_pos = self.pos + self.action_list[action_id]
-        if self.xmin <= tmp_pos[0] <= self.xmax \
-                and self.ymin <= tmp_pos[1] <= self.ymax \
-                and self.map[tmp_pos[0], tmp_pos[1]] != -1:
+        if (self.xmin <= tmp_pos[0] <= self.xmax and
+                self.ymin <= tmp_pos[1] <= self.ymax and
+                self.map[tmp_pos[0], tmp_pos[1]] != -1):
+
             self.ax.plot(
                     [self.pos[0], tmp_pos[0]],
                     [self.pos[1], tmp_pos[1]],
@@ -135,14 +137,14 @@ class GridMaze(gym.Env):
         self.ax.add_patch(self.agent_circle)
         self.fig.savefig(self.render_dir+f'{self.step_counter:04}.png')
 
-    def plot_state_value_function(self, state_value, cmap, fname):
+    def draw_heat_map(self, state_value, cmap, fname, vmin=None, vmax=None):
         fig, ax = plt.subplots(1, 1, tight_layout=True)
-        ax.imshow(state_value.T, cmap=cmap, origin='lower')
+        ax.imshow(state_value.T, cmap=cmap, origin='lower', vmin=vmin, vmax=vmax)
         self.draw_maze(ax)
         fig.savefig(f'{fname}.png')
 
     def get_zero_map(self):
-        return np.zeros((self.width, self.height))
+        return self.empty_map.copy()
 
     def debug(self):
         self.reset()
